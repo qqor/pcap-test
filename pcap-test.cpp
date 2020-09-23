@@ -38,7 +38,7 @@ void popopo(const u_char *pkt){
     uint32_t len = ip->ip_len - sizeof(libnet_ipv4_hdr) - sizeof(libnet_tcp_hdr);
     printf("data length : %d\n", len);
 
-    len = len > 16 ? len : 16;
+    len = len > 16 ? 16 : len;
     data = (u_char *)tcp + tcp->th_off * 4;
 
     printf("data : ");
