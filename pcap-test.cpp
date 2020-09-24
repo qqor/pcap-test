@@ -2,6 +2,10 @@
 #include <libnet.h>
 #include <pcap.h>
 
+void print_mac(uint8_t *mac, char *src){
+    printf("ethernet %s mac : %02x:%02x:%02x:%02x:%02x:%02x\n",src,mac[0],mac[1],mac[2],mac[3],mac[4],mac[5]);
+}
+
 void popopo(const u_char *pkt){
     libnet_ethernet_hdr *eth = (libnet_ethernet_hdr *)pkt;
     uint16_t eth_type = ((eth->ether_type & 0xff) << 8) + ((eth->ether_type & 0xff00) >> 8);
@@ -11,17 +15,17 @@ void popopo(const u_char *pkt){
     u_char *data;
 
     // if not TCP
-    if(eth_type != 0x800){
+    if(eth_type != ETHERTYPE_IP){
         return;
     }
 
+    // line
+    printf("=========================================\n\n");
+
     // ethernet
-    uint8_t *mac;
     printf("ethernet\n");
-    mac = eth->ether_shost;
-    printf("ethernet src mac : %02x:%02x:%02x:%02x:%02x:%02x\n",mac[0],mac[1],mac[2],mac[3],mac[4],mac[5]);
-    mac = eth->ether_dhost;
-    printf("ethernet dest mac : %02x:%02x:%02x:%02x:%02x:%02x\n",mac[0],mac[1],mac[2],mac[3],mac[4],mac[5]);
+    print_mac(eth->ether_shost, "src");
+    print_mac(eth->ether_dhost, "dest");
     printf("ethernet type : 0x%04x\n\n", eth_type);
 
     // ip
@@ -45,13 +49,18 @@ void popopo(const u_char *pkt){
     for(int i=0; i<len; i++){
         printf("%02x", data[i]);
     }
+    
     printf("\n\n");
+}
+
+void usage(){
+    printf("syntax: pcap-test <interface>\n");
+    printf("sample: pcap-test wlan0\n");
 }
 
 int main(int argc, char *argv[]){
     if(argc != 2){
-        printf("syntax: pcap-test <interface>\n");
-        printf("sample: pcap-test wlan0\n");
+        usage();
         return -1;
     }
 
